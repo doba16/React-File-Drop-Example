@@ -4,7 +4,8 @@ import './App.css'
 
 type FileItem = {
   name: string,
-  content: string
+  content: string,
+  json?: any
 }
 
 const readFile = (file: File): Promise<FileItem> => {
@@ -20,9 +21,13 @@ const readFile = (file: File): Promise<FileItem> => {
       const result = fr.result
       if (typeof result == "string") {
         fileItem.content = result
+        try {
+          const json = JSON.parse(result)
+          fileItem.json = json
+        } catch (e) {
+          console.log(`${file.name} is not JSON.`)
+        }
       }
-
-      console.log(typeof result, result)
 
       res(fileItem)
     }
@@ -65,12 +70,13 @@ function App() {
       </div>
 
       <ul>
-        { files.map((f) => (
-          <li>
+        { files.map((f, i) => (
+          <li key={i}>
             <b>{f.name}</b>
             <pre>
               {f.content}
             </pre>
+            {f.json && JSON.stringify(f.json) || "Not JSON."}
           </li>
         ))}
       </ul>
