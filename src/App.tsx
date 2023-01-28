@@ -7,6 +7,30 @@ type FileItem = {
   content: string
 }
 
+const readFile = (file: File): Promise<FileItem> => {
+  return new Promise((res, rej) => {
+    const fileItem: FileItem = {
+      name: file.name,
+      content: ""
+    }
+
+    const fr = new FileReader()
+
+    fr.onload = () => {
+      const result = fr.result
+      if (typeof result == "string") {
+        fileItem.content = result
+      }
+
+      console.log(typeof result, result)
+
+      res(fileItem)
+    }
+
+    fr.readAsText(file)
+  })
+} 
+
 function App() {
   const [count, setCount] = useState(0)
   const [files, setFiles] = useState<FileItem[]>([])
@@ -18,27 +42,20 @@ function App() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
 
-    const newFiles: FileItem[] = []
-    for (const file of e.dataTransfer.files) {
-      
-      const fileItem: FileItem = {
-        name: file.name,
-        content: ""
-      }
-      
-      const fr = new FileReader()
-      console.log("fr", fr)
-      fr.onload = () => {
-        // @ts-ignore
-        fileItem.content = fr.result
-        console.log("Result", typeof fr.result)
-      }
-      fr.readAsText(file)
+    console.log(e)
 
-      newFiles.push(fileItem)
+    const fileList: Promise<FileItem>[] = []
+    for (const f of e.dataTransfer.files) {
+      console.log("Test", f)
+      fileList.push(readFile(f))
     }
 
-    setFiles(newFiles)
+    console.log("Here", fileList)
+
+    Promise.all(fileList).then(e => {
+      console.log("Foo", e)
+      setFiles(e)
+    })
   }
 
   return (
