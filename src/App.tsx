@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { DetailedHTMLProps, InputHTMLAttributes, useRef, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 
@@ -42,19 +42,17 @@ function App() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [dragState, setDragState] = useState<DragState>("none")
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
 
     e.dataTransfer.dropEffect = "copy"
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-
-    console.log(e)
-
+  const uploadFiles = (files: FileList) => {
     const fileList: Promise<FileItem>[] = []
-    for (const f of e.dataTransfer.files) {
+    for (const f of files) {
       console.log("Test", f)
       fileList.push(readFile(f))
     }
@@ -65,17 +63,37 @@ function App() {
       console.log("Foo", e)
       setFiles(e)
     })
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+
+    console.log(e)
+
+    uploadFiles(e.dataTransfer.files)
 
     setDragState("none")
+  }
+
+  const handleClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleInputChanged = (e: any) => {
+    console.log(e)
+    uploadFiles(e.target.files)
   }
 
   return (
     <>
       <div className={`drop ${dragState}`} onDragOver={handleDragOver} onDrop={handleDrop}
           onDragEnter={() => setDragState("allowed")}
-          onDragLeave={() => setDragState("none")}>
+          onDragLeave={() => setDragState("none")}
+          onClick={handleClick}>
         Drag file here.
       </div>
+
+      <input type={"file"} ref={fileInputRef} hidden onChange={handleInputChanged} accept="application/json" multiple />
 
       <ul>
         { files.map((f, i) => (
