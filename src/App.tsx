@@ -8,6 +8,8 @@ type FileItem = {
   json?: any
 }
 
+type DragState = "none" | "allowed" | "invalid"
+
 const readFile = (file: File): Promise<FileItem> => {
   return new Promise((res, rej) => {
     const fileItem: FileItem = {
@@ -37,11 +39,13 @@ const readFile = (file: File): Promise<FileItem> => {
 } 
 
 function App() {
-  const [count, setCount] = useState(0)
   const [files, setFiles] = useState<FileItem[]>([])
+  const [dragState, setDragState] = useState<DragState>("none")
 
-  const handleDragOver = (e: any) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
+
+    e.dataTransfer.dropEffect = "copy"
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -61,11 +65,15 @@ function App() {
       console.log("Foo", e)
       setFiles(e)
     })
+
+    setDragState("none")
   }
 
   return (
     <>
-      <div className="drop" onDragOver={handleDragOver} onDrop={handleDrop}>
+      <div className={`drop ${dragState}`} onDragOver={handleDragOver} onDrop={handleDrop}
+          onDragEnter={() => setDragState("allowed")}
+          onDragLeave={() => setDragState("none")}>
         Drag file here.
       </div>
 
