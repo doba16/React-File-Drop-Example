@@ -1,7 +1,16 @@
-
-
 .drop {
+  --border-clr: gray;
+
   padding: 3em;
-  border: 3px dashed gray;
+  border: 3px dashed var(--border-clr);
   text-align: center;
+  cursor: pointer;
+}
+
+.drop.invalid {
+  --border-clr: red;
+}
+
+.drop.allowed {
+  --border-clr: blue;
 }
